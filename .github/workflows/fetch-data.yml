@@ -1,0 +1,48 @@
+name: Fetch Airtable Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: npm install airtable
+    - name: Fetch data from Airtable
+      env:
+        AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+        AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+      run: |
+        node <<EOF
+        const Airtable = require('airtable');
+        const fs = require('fs');
+        
+        const base = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(process.env.AIRTABLE_BASE_ID);
+        
+        let allRecords = [];
+        
+        base('Contents').select({
+          view: "Grid view"
+        }).eachPage(function page(records, fetchNextPage) {
+          allRecords = allRecords.concat(records.map(record => record._rawJson));
+          fetchNextPage();
+        }, function done(err) {
+          if (err) { console.error(err); return; }
+          fs.writeFileSync('data.json', JSON.stringify(allRecords));
+        });
+        EOF
+    - name: Commit and push if it changed
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add data.json
+        git commit -m "Update data" || exit 0
+        git push
+ 
