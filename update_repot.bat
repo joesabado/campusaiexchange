@@ -28,18 +28,13 @@ git reset -- data.json
 
 REM Check if there are changes to commit
 git diff --cached --quiet || (
-    set /p "commit_message=Enter commit message (leave empty to skip commit): "
-    if not "!commit_message!"=="" (
-        echo Committing changes with message: "!commit_message!"
-        git commit -m "!commit_message!"
-        echo Changes committed
-        
-        REM Push changes to remote repository
-        echo Pushing changes to remote repository
-        git push
-    ) else (
-        echo Commit skipped (empty message provided)
-    )
+    echo Committing changes with automatic message
+    git commit -m "Auto-update: %date% %time%"
+    echo Changes committed
+    
+    REM Push changes to remote repository
+    echo Pushing changes to remote repository
+    git push
 ) || (
     echo No changes to commit
 )
