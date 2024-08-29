@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-025');
+console.log('Script version: 2023-05-10-026');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -9,6 +9,33 @@ let filteredData = [];
 const itemsPerPage = 50;
 let currentPage = 1;
 let isLoading = false;
+
+async function testAirtableConnection() {
+    const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
+    const url = new URL(baseUrl);
+    url.searchParams.append('maxRecords', '1');
+
+    console.log('Testing Airtable connection...');
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('Airtable connection test successful. Sample data:', data);
+        return true;
+    } catch (error) {
+        console.error('Airtable connection test failed:', error);
+        return false;
+    }
+}
 
 async function fetchAllAirtableData() {
     let allRecords = [];
@@ -72,12 +99,21 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM content loaded');
     updateInfo();
     const contentDiv = document.getElementById('content');
-    contentDiv.innerHTML = '<p>Loading...</p>';
+    contentDiv.innerHTML = '<p>Testing connection...</p>';
 
-    loadInitialData();
-    setupSearch();
-    setupPagination();
+    testConnection();
 });
+
+async function testConnection() {
+    const connectionSuccessful = await testAirtableConnection();
+    if (connectionSuccessful) {
+        loadInitialData();
+        setupSearch();
+        setupPagination();
+    } else {
+        document.getElementById('content').innerHTML = '<p class="error">Failed to connect to Airtable. Please check your API key and base ID.</p>';
+    }
+}
 
 async function loadInitialData() {
     try {
