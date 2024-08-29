@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Airtable Data Display</title>
+    <style>
+        #loadingIndicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div id="version">Version: 2023-05-10-016</div>
-    <div id="timestamp">Last updated: 2023-05-10 06:00:00</div>
+    <div id="version">Version: 2023-05-10-017</div>
+    <div id="timestamp">Last updated: 2023-05-10 07:00:00</div>
     <div id="updateInfo"></div>
     <div id="recordCount"></div>
     <div id="search">
@@ -15,12 +22,8 @@
         <button id="searchButton">Search</button>
     </div>
     <div id="content"></div>
-    <div id="pagination">
-        <button id="prevPage">Previous</button>
-        <span id="currentPage"></span>
-        <button id="nextPage">Next</button>
-    </div>
-    <script src="script.js?v=2023-05-10-016"></script>
+    <div id="loadingIndicator">Loading more items...</div>
+    <script src="script.js?v=2023-05-10-017"></script>
 </body>
 </html>
 
