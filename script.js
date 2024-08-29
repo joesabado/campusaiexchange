@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log(`Data received from ${tableName} table:`, JSON.stringify(data, null, 2));
+            console.log(`Raw data received:`, JSON.stringify(data, null, 2));
             allData = data;
+            console.log(`Processed allData:`, JSON.stringify(allData, null, 2));
             displayData();
             setupPagination();
         })
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function displayData() {
-    console.log(`Displaying data from ${tableName} table for page`, currentPage);
+    console.log(`Displaying data for page`, currentPage);
     const contentDiv = document.getElementById('content');
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -57,8 +58,8 @@ function displayData() {
     console.log('Page data:', JSON.stringify(pageData, null, 2));
 
     let html = '<ul>';
-    pageData.forEach(item => {
-        console.log('Processing item:', JSON.stringify(item));
+    pageData.forEach((item, index) => {
+        console.log(`Item ${index}:`, JSON.stringify(item, null, 2));
         html += `<li>${item.title || 'No Title'} - ${item.url || 'No URL'}</li>`;
     });
     html += '</ul>';

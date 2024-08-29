@@ -1,5 +1,48 @@
 @echo off
-git pull origin main
-git add .
-git commit -m "Update data and scripts"
-git push origin main
+setlocal enabledelayedexpansion
+
+echo Updating repository...
+
+REM Stash local changes to data.json if it exists and has changes
+git diff --quiet data.json || (
+    echo Stashing changes to data.json
+    git stash push data.json
+)
+
+REM Pull changes from the remote repository
+echo Pulling changes from remote repository
+git pull
+
+REM Pop the stashed changes to data.json if there were any
+git stash list | findstr /C:"stash@{0}" >nul && (
+    echo Reapplying local changes to data.json
+    git stash pop
+) || (
+    echo No stashed changes for data.json
+)
+
+REM Add all changes except data.json
+echo Staging changes (excluding data.json)
+git add -A
+git reset -- data.json
+
+REM Check if there are changes to commit
+git diff --cached --quiet || (
+    set /p "commit_message=Enter commit message (leave empty to skip commit): "
+    if not "!commit_message!"=="" (
+        echo Committing changes with message: "!commit_message!"
+        git commit -m "!commit_message!"
+        echo Changes committed
+        
+        REM Push changes to remote repository
+        echo Pushing changes to remote repository
+        git push
+    ) else (
+        echo Commit skipped (empty message provided)
+    )
+) || (
+    echo No changes to commit
+)
+
+echo Repository update complete.
+pause
