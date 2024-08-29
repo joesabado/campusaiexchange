@@ -60,7 +60,7 @@ function displayData() {
     let html = '<ul>';
     pageData.forEach((item, index) => {
         console.log(`Item ${index}:`, JSON.stringify(item, null, 2));
-        html += `<li>${item.title || 'No Title'} - ${item.url || 'No URL'}</li>`;
+        html += `<li>${item.Title || 'No Title'} - ${item.URL || 'No URL'}</li>`;
     });
     html += '</ul>';
 
