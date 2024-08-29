@@ -1,26 +1,44 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const contentDiv = document.getElementById('content');
+    contentDiv.innerHTML = '<p>Loading...</p>';
+
     fetch('data.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             console.log(data);
             displayData(data);
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            contentDiv.innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
+        });
 });
 
 function displayData(data) {
     const contentDiv = document.getElementById('content');
     contentDiv.innerHTML = ''; // Clear existing content
 
+    if (!Array.isArray(data) || data.length === 0) {
+        contentDiv.innerHTML = '<p>No data available</p>';
+        return;
+    }
+
     data.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item';
         
-        // Customize this part based on your Airtable data structure
+        // Assuming 'fields' exists in your data structure
+        const fields = item.fields || {};
+        
         itemDiv.innerHTML = `
-            <h2>${item.fields.Name}</h2>
-            <p>${item.fields.Description}</p>
-            <p>Category: ${item.fields.Category}</p>
+            <h2 class="item-name">${fields.Name || 'Unnamed'}</h2>
+            <p class="item-description">${fields.Description || 'No description'}</p>
+            <p class="item-category">Category: ${fields.Category || 'Uncategorized'}</p>
         `;
         
         contentDiv.appendChild(itemDiv);
