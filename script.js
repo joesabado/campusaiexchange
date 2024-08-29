@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-014');
+console.log('Script version: 2023-05-10-016');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`Data received from ${tableName} table:`, data.length, 'items');
             allData = data;
             filteredData = allData;
+            updateRecordCount(allData.length);
             displayData();
             setupPagination();
             setupSearch();
@@ -71,6 +72,11 @@ function updateInfo() {
     `;
 }
 
+function updateRecordCount(count) {
+    const recordCountDiv = document.getElementById('recordCount');
+    recordCountDiv.innerHTML = `<p>Total records: ${count}</p>`;
+}
+
 function displayData() {
     console.log(`Displaying data for page`, currentPage);
     const contentDiv = document.getElementById('content');
@@ -90,6 +96,7 @@ function displayData() {
 
     contentDiv.innerHTML = html;
     updatePaginationInfo();
+    updateRecordCount(filteredData.length);
 }
 
 function setupPagination() {
@@ -141,12 +148,7 @@ function performSearch() {
         const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
         const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
         
-        const matchTitle = title.includes(searchTerm);
-        const matchSummary = summary.includes(searchTerm);
-        
-        console.log(`Item: ${title}, Matches Title: ${matchTitle}, Matches Summary: ${matchSummary}`);
-        
-        return matchTitle || matchSummary;
+        return title.includes(searchTerm) || summary.includes(searchTerm);
     });
     
     console.log(`Search results: ${filteredData.length} items found`);
