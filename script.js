@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 
+// Pagination variables
+let currentPage = 1;
+const itemsPerPage = 10;
+
 function displayData(data) {
     const contentDiv = document.getElementById('content');
     contentDiv.innerHTML = ''; // Clear existing content
@@ -28,7 +32,14 @@ function displayData(data) {
         return;
     }
 
-    data.forEach(item => {
+    // Calculate pagination
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentPageData = data.slice(startIndex, endIndex);
+
+    // Display current page data
+    currentPageData.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item';
         
@@ -41,5 +52,30 @@ function displayData(data) {
         `;
         
         contentDiv.appendChild(itemDiv);
+    });
+
+    // Add pagination controls
+    const paginationDiv = document.createElement('div');
+    paginationDiv.className = 'pagination';
+    paginationDiv.innerHTML = `
+        <button id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
+        <span>Page ${currentPage} of ${totalPages}</span>
+        <button id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
+    `;
+    contentDiv.appendChild(paginationDiv);
+
+    // Add event listeners for pagination buttons
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayData(data);
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayData(data);
+        }
     });
 }
