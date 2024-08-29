@@ -1,5 +1,5 @@
 let allData = [];
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 let currentPage = 1;
 const tableName = 'Contents';
 
