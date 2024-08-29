@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-024');
+console.log('Script version: 2023-05-10-025');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -20,9 +20,14 @@ async function fetchAllAirtableData() {
         console.log(`Fetching page ${pageCount}...`);
         try {
             const data = await fetchAirtableData(offset);
-            allRecords = allRecords.concat(data.records);
-            offset = data.offset;
-            console.log(`Fetched ${allRecords.length} records so far. Offset: ${offset}`);
+            if (data && data.records) {
+                allRecords = allRecords.concat(data.records);
+                offset = data.offset;
+                console.log(`Fetched ${allRecords.length} records so far. Offset: ${offset}`);
+            } else {
+                console.error('Unexpected data structure:', data);
+                break;
+            }
         } catch (error) {
             console.error(`Error fetching page ${pageCount}:`, error);
             break;
@@ -55,7 +60,7 @@ async function fetchAirtableData(offset = null) {
         }
 
         const data = await response.json();
-        console.log(`Received ${data.records.length} records in this batch`);
+        console.log(`Received ${data.records ? data.records.length : 0} records in this batch`);
         return data;
     } catch (error) {
         console.error('Error fetching data:', error);
