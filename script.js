@@ -36,7 +36,7 @@ function displayData() {
 
     let html = '<ul>';
     pageData.forEach(item => {
-        html += `<li>${item.Title} - ${item.URL}</li>`;
+        html += `<li>${item.title} - ${item.url}</li>`;
     });
     html += '</ul>';
 
