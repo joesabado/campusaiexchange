@@ -25,6 +25,26 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.message}</p>`;
         });
+
+    // Display update indicators
+    const bodyComments = document.body.childNodes;
+    let lastUpdated = '';
+    let randomNumber = '';
+    for (let node of bodyComments) {
+        if (node.nodeType === Node.COMMENT_NODE) {
+            if (node.textContent.includes('Last updated:')) {
+                lastUpdated = node.textContent.trim();
+            } else if (node.textContent.includes('Random number:')) {
+                randomNumber = node.textContent.trim();
+            }
+        }
+    }
+    const indicatorsDiv = document.createElement('div');
+    indicatorsDiv.innerHTML = `
+        <p>${lastUpdated}</p>
+        <p>${randomNumber}</p>
+    `;
+    document.body.insertBefore(indicatorsDiv, document.body.firstChild);
 });
 
 function displayData() {
