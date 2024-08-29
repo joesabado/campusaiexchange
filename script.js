@@ -1,5 +1,7 @@
+console.log('Script version: 2023-05-10-001');
+
 let allData = [];
-const itemsPerPage = 5; // Make sure this is set to 10
+const itemsPerPage = 5; // Changed to 5
 let currentPage = 1;
 const tableName = 'Contents';
 
