@@ -10,17 +10,24 @@ let currentPage = 1;
 
 // Function to fetch data from Airtable
 async function fetchAirtableData() {
-    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
-    const response = await fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const url = `${corsProxy}https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch data from Airtable');
+        const data = await response.json();
+        return data.records;
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
     }
-    const data = await response.json();
-    return data.records;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
