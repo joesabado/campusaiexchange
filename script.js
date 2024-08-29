@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-012');
+console.log('Script version: 2023-05-10-013');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -6,28 +6,37 @@ const tableName = 'Contents';
 
 let allData = [];
 let filteredData = [];
-const itemsPerPage = 5;
+const itemsPerPage = 50;
 let currentPage = 1;
 
-// Function to fetch data from Airtable
-async function fetchAirtableData() {
-    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=100&view=Grid%20view`;
-    try {
+// Function to fetch all data from Airtable
+async function fetchAllAirtableData() {
+    let allRecords = [];
+    let offset = null;
+    const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
+
+    do {
+        const url = offset
+            ? `${baseUrl}?offset=${offset}`
+            : `${baseUrl}`;
+        
         console.log('Fetching data from URL:', url);
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${AIRTABLE_API_KEY}`
             }
         });
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const data = await response.json();
-        return data.records;
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
-    }
+        allRecords = allRecords.concat(data.records);
+        offset = data.offset;
+    } while (offset);
+
+    return allRecords;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -36,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentDiv = document.getElementById('content');
     contentDiv.innerHTML = '<p>Loading...</p>';
 
-    fetchAirtableData()
+    fetchAllAirtableData()
         .then(data => {
             console.log(`Data received from ${tableName} table:`, data.length, 'items');
             allData = data;
