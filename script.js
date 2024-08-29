@@ -10,8 +10,7 @@ let currentPage = 1;
 
 // Function to fetch data from Airtable
 async function fetchAirtableData() {
-    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-    const url = `${corsProxy}https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
     try {
         console.log('Fetching data from URL:', url);
         const response = await fetch(url, {
