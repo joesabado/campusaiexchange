@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-console.log('Script version: 2023-05-10-022');
-=======
-console.log('Script version: 2023-05-10-017');
->>>>>>> origin/main
+console.log('Script version: 2023-05-10-024');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -14,7 +10,6 @@ const itemsPerPage = 50;
 let currentPage = 1;
 let isLoading = false;
 
-<<<<<<< HEAD
 async function fetchAllAirtableData() {
     let allRecords = [];
     let offset = null;
@@ -66,25 +61,6 @@ async function fetchAirtableData(offset = null) {
         console.error('Error fetching data:', error);
         throw error;
     }
-=======
-async function fetchAirtableData(offset = null) {
-    const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
-    const url = offset ? `${baseUrl}?offset=${offset}` : baseUrl;
-
-    console.log('Fetching data from URL:', url);
-    const response = await fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
->>>>>>> origin/main
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -95,25 +71,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadInitialData();
     setupSearch();
-<<<<<<< HEAD
     setupPagination();
-=======
-    window.addEventListener('scroll', handleScroll);
->>>>>>> origin/main
 });
 
 async function loadInitialData() {
     try {
-<<<<<<< HEAD
         console.log('Starting to load initial data...');
         const records = await fetchAllAirtableData();
         console.log(`Total data received from ${tableName} table:`, records.length, 'items');
         allData = records;
-=======
-        const data = await fetchAirtableData();
-        console.log(`Initial data received from ${tableName} table:`, data.records.length, 'items');
-        allData = data.records;
->>>>>>> origin/main
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
@@ -123,43 +89,6 @@ async function loadInitialData() {
     }
 }
 
-async function loadMoreData() {
-    if (isLoading || allData.length >= filteredData.length) return;
-
-    isLoading = true;
-    document.getElementById('loadingIndicator').style.display = 'block';
-
-    try {
-        const lastRecord = allData[allData.length - 1];
-        const data = await fetchAirtableData(lastRecord.id);
-        console.log(`Additional data received:`, data.records.length, 'items');
-        allData = allData.concat(data.records);
-        updateRecordCount(allData.length);
-        displayData();
-<<<<<<< HEAD
-=======
-
-        if (!data.offset) {
-            window.removeEventListener('scroll', handleScroll);
-        }
->>>>>>> origin/main
-    } catch (error) {
-        console.error('Error loading more data:', error);
-    } finally {
-        isLoading = false;
-        document.getElementById('loadingIndicator').style.display = 'none';
-    }
-}
-
-<<<<<<< HEAD
-=======
-function handleScroll() {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-        loadMoreData();
-    }
-}
-
->>>>>>> origin/main
 function updateInfo() {
     const updateInfoDiv = document.getElementById('updateInfo');
     const now = new Date();
@@ -177,32 +106,31 @@ function updateRecordCount(count) {
 }
 
 function displayData() {
-<<<<<<< HEAD
     console.log(`Displaying data for page ${currentPage}`);
     const contentDiv = document.getElementById('content');
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pageData = filteredData.slice(startIndex, endIndex);
     
-    let html = '<ul>';
-    pageData.forEach(item => {
-=======
-    console.log(`Displaying data, current total:`, allData.length);
-    const contentDiv = document.getElementById('content');
+    console.log(`Displaying records ${startIndex + 1} to ${endIndex} of ${filteredData.length}`);
+    
+    if (pageData.length === 0) {
+        contentDiv.innerHTML = '<p>No data to display</p>';
+        return;
+    }
     
     let html = '<ul>';
-    allData.forEach(item => {
->>>>>>> origin/main
+    pageData.forEach((item, index) => {
+        console.log(`Processing item ${startIndex + index + 1}:`, item);
         html += `<li>
-            <strong>${item.fields.Title}</strong><br>
+            <strong>${item.fields.Title || 'No Title'}</strong><br>
             ${item.fields['Short Summary'] || 'No summary available'}<br>
-            <a href="${item.fields.URL}" target="_blank">Link</a>
+            <a href="${item.fields.URL || '#'}" target="_blank">Link</a>
         </li>`;
     });
     html += '</ul>';
 
     contentDiv.innerHTML = html;
-<<<<<<< HEAD
     updatePaginationInfo();
 }
 
@@ -235,8 +163,6 @@ function updatePaginationInfo() {
     pageInfos.forEach(span => {
         span.textContent = `Page ${currentPage} of ${totalPages}`;
     });
-=======
->>>>>>> origin/main
 }
 
 function setupSearch() {
@@ -263,10 +189,7 @@ function performSearch() {
     });
     
     console.log(`Search results: ${filteredData.length} items found`);
-<<<<<<< HEAD
     currentPage = 1;
-=======
->>>>>>> origin/main
     displayData();
     updateRecordCount(filteredData.length);
 }
