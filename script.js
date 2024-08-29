@@ -1,22 +1,34 @@
-console.log('Script version: 2023-05-10-001');
+console.log('Script version: 2023-05-10-004');
+
+const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
+const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
+const tableName = 'Contents';
 
 let allData = [];
-const itemsPerPage = 5; // Changed to 5
+const itemsPerPage = 5;
 let currentPage = 1;
-const tableName = 'Contents';
+
+// Function to fetch data from Airtable
+async function fetchAirtableData() {
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch data from Airtable');
+    }
+    const data = await response.json();
+    return data.records;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM content loaded');
     const contentDiv = document.getElementById('content');
     contentDiv.innerHTML = '<p>Loading...</p>';
 
-    fetch('data.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+    fetchAirtableData()
         .then(data => {
             console.log(`Data received from ${tableName} table:`, data.length, 'items');
             allData = data;
@@ -27,26 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
             contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.message}</p>`;
         });
-
-    // Display update indicators
-    const bodyComments = document.body.childNodes;
-    let lastUpdated = '';
-    let randomNumber = '';
-    for (let node of bodyComments) {
-        if (node.nodeType === Node.COMMENT_NODE) {
-            if (node.textContent.includes('Last updated:')) {
-                lastUpdated = node.textContent.trim();
-            } else if (node.textContent.includes('Random number:')) {
-                randomNumber = node.textContent.trim();
-            }
-        }
-    }
-    const indicatorsDiv = document.createElement('div');
-    indicatorsDiv.innerHTML = `
-        <p>${lastUpdated}</p>
-        <p>${randomNumber}</p>
-    `;
-    document.body.insertBefore(indicatorsDiv, document.body.firstChild);
 });
 
 function displayData() {
@@ -58,7 +50,7 @@ function displayData() {
 
     let html = '<ul>';
     pageData.forEach(item => {
-        html += `<li>${item.title} - ${item.url}</li>`;
+        html += `<li>${item.fields.Title} - ${item.fields.URL}</li>`;
     });
     html += '</ul>';
 
@@ -68,35 +60,29 @@ function displayData() {
 
 function setupPagination() {
     console.log('Setting up pagination');
-    const prevButtons = document.querySelectorAll('.prevPage');
-    const nextButtons = document.querySelectorAll('.nextPage');
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
 
-    prevButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            console.log('Previous button clicked');
-            if (currentPage > 1) {
-                currentPage--;
-                displayData();
-            }
-        });
+    prevButton.addEventListener('click', () => {
+        console.log('Previous button clicked');
+        if (currentPage > 1) {
+            currentPage--;
+            displayData();
+        }
     });
 
-    nextButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            console.log('Next button clicked');
-            if (currentPage < Math.ceil(allData.length / itemsPerPage)) {
-                currentPage++;
-                displayData();
-            }
-        });
+    nextButton.addEventListener('click', () => {
+        console.log('Next button clicked');
+        if (currentPage < Math.ceil(allData.length / itemsPerPage)) {
+            currentPage++;
+            displayData();
+        }
     });
 }
 
 function updatePaginationInfo() {
-    const currentPageSpans = document.querySelectorAll('.currentPage');
+    const currentPageSpan = document.getElementById('currentPage');
     const totalPages = Math.ceil(allData.length / itemsPerPage);
-    currentPageSpans.forEach(span => {
-        span.textContent = `Page ${currentPage} of ${totalPages}`;
-    });
+    currentPageSpan.textContent = `Page ${currentPage} of ${totalPages}`;
     console.log('Updated pagination info:', `Page ${currentPage} of ${totalPages}`);
 }
