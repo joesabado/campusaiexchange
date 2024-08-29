@@ -1,6 +1,7 @@
-let currentPage = 1;
-const itemsPerPage = 5; // Changed from 10 to 5
 let allData = [];
+const itemsPerPage = 5;
+let currentPage = 1;
+const tableName = 'Contents';
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM content loaded');
@@ -15,19 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log('Data loaded:', data.length, 'items');
+            console.log(`Data received from ${tableName} table:`, data.length, 'items');
             allData = data;
             displayData();
             setupPagination();
         })
         .catch(error => {
             console.error('Error:', error);
-            contentDiv.innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
+            contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.message}</p>`;
         });
 });
 
 function displayData() {
-    console.log('Displaying data for page', currentPage);
+    console.log(`Displaying data from ${tableName} table for page`, currentPage);
     const contentDiv = document.getElementById('content');
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -45,29 +46,35 @@ function displayData() {
 
 function setupPagination() {
     console.log('Setting up pagination');
-    const prevButton = document.getElementById('prevPage');
-    const nextButton = document.getElementById('nextPage');
+    const prevButtons = document.querySelectorAll('.prevPage');
+    const nextButtons = document.querySelectorAll('.nextPage');
 
-    prevButton.addEventListener('click', () => {
-        console.log('Previous button clicked');
-        if (currentPage > 1) {
-            currentPage--;
-            displayData();
-        }
+    prevButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            console.log('Previous button clicked');
+            if (currentPage > 1) {
+                currentPage--;
+                displayData();
+            }
+        });
     });
 
-    nextButton.addEventListener('click', () => {
-        console.log('Next button clicked');
-        if (currentPage < Math.ceil(allData.length / itemsPerPage)) {
-            currentPage++;
-            displayData();
-        }
+    nextButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            console.log('Next button clicked');
+            if (currentPage < Math.ceil(allData.length / itemsPerPage)) {
+                currentPage++;
+                displayData();
+            }
+        });
     });
 }
 
 function updatePaginationInfo() {
-    const currentPageSpan = document.getElementById('currentPage');
+    const currentPageSpans = document.querySelectorAll('.currentPage');
     const totalPages = Math.ceil(allData.length / itemsPerPage);
-    currentPageSpan.textContent = `Page ${currentPage} of ${totalPages}`;
-    console.log('Updated pagination info:', currentPageSpan.textContent);
+    currentPageSpans.forEach(span => {
+        span.textContent = `Page ${currentPage} of ${totalPages}`;
+    });
+    console.log('Updated pagination info:', `Page ${currentPage} of ${totalPages}`);
 }
