@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-004');
+console.log('Script version: 2023-05-10-006');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -13,16 +13,21 @@ async function fetchAirtableData() {
     const corsProxy = 'https://cors-anywhere.herokuapp.com/';
     const url = `${corsProxy}https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}?maxRecords=10&view=Grid%20view`;
     try {
+        console.log('Fetching data from URL:', url);
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${AIRTABLE_API_KEY}`
             }
         });
+        console.log('Response status:', response.status);
+        console.log('Response headers:', JSON.stringify(Array.from(response.headers.entries())));
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('Error response body:', errorText);
             throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
         const data = await response.json();
+        console.log('Data received:', JSON.stringify(data, null, 2));
         return data.records;
     } catch (error) {
         console.error('Fetch error:', error);
@@ -32,6 +37,7 @@ async function fetchAirtableData() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM content loaded');
+    updateInfo();
     const contentDiv = document.getElementById('content');
     contentDiv.innerHTML = '<p>Loading...</p>';
 
@@ -47,6 +53,17 @@ document.addEventListener('DOMContentLoaded', function() {
             contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.message}</p>`;
         });
 });
+
+function updateInfo() {
+    const updateInfoDiv = document.getElementById('updateInfo');
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const randomNumber = Math.floor(Math.random() * 1000000);
+    updateInfoDiv.innerHTML = `
+        <p>Last updated: ${timestamp}</p>
+        <p>Random number: ${randomNumber}</p>
+    `;
+}
 
 function displayData() {
     console.log(`Displaying data from ${tableName} table for page`, currentPage);
