@@ -3,10 +3,9 @@ setlocal enabledelayedexpansion
 
 echo Updating repository...
 
-<<<<<<< HEAD
 REM Fetch the latest changes from the remote repository
 echo Fetching changes from remote repository
-git fetch
+git fetch origin
 
 REM Check if there are any changes to pull
 git rev-list HEAD...origin/main --count > temp.txt
@@ -15,58 +14,60 @@ del temp.txt
 
 if %commit_count% gtr 0 (
     echo There are changes to pull. Pulling changes...
-    git pull --rebase
+    git pull --rebase origin main
+    if errorlevel 1 (
+        echo Pull failed. Attempting merge...
+        git merge origin/main --allow-unrelated-histories
+        if errorlevel 1 (
+            echo Merge failed. Please resolve conflicts manually and run the script again.
+            exit /b 1
+        )
+    )
 ) else (
     echo Local repository is up to date.
 )
 
+REM Remove data.json from tracking if it exists
+git rm --cached data.json 2>nul
+
 REM Add all changes
 echo Staging all changes
-git add -A
+git add .
+
+REM Check for large files
+for /f "tokens=3" %%a in ('git status --porcelain ^| findstr /r "^?? "') do (
+    for %%F in ("%%a") do (
+        set "size=%%~zF"
+        if !size! gtr 104857600 (
+            echo Warning: File %%F is larger than 100MB. Removing from staging.
+            git reset HEAD "%%F"
+        )
+    )
+)
 
 REM Check if there are changes to commit
-git diff --cached --quiet || (
+git diff --cached --quiet
+if errorlevel 1 (
     set /p commit_message="Enter commit message: "
     if "!commit_message!"=="" (
         set commit_message="Auto-update: %date% %time%"
     )
     echo Committing changes with message: "!commit_message!"
     git commit -m "!commit_message!"
-=======
-REM Stash local changes to data.json if it exists and has changes
-git diff --quiet data.json || (
-    echo Stashing changes to data.json
-    git stash push data.json
-)
-
-REM Pull changes from the remote repository
-echo Pulling changes from remote repository
-git pull
-
-REM Pop the stashed changes to data.json if there were any
-git stash list | findstr /C:"stash@{0}" >nul && (
-    echo Reapplying local changes to data.json
-    git stash pop
-) || (
-    echo No stashed changes for data.json
-)
-
-REM Add all changes except data.json
-echo Staging changes (excluding data.json)
-git add -A
-git reset -- data.json
-
-REM Check if there are changes to commit
-git diff --cached --quiet || (
-    echo Committing changes with automatic message
-    git commit -m "Auto-update: %date% %time%"
-    echo Changes committed
->>>>>>> origin/main
     
     REM Push changes to remote repository
     echo Pushing changes to remote repository
-    git push
-) || (
+    git push origin main
+    if errorlevel 1 (
+        echo Push failed. Pulling latest changes and trying again...
+        git pull --rebase origin main
+        git push origin main
+        if errorlevel 1 (
+            echo Push failed again. Please resolve issues manually.
+            exit /b 1
+        )
+    )
+) else (
     echo No changes to commit
 )
 
