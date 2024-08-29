@@ -37,8 +37,8 @@ function displayData(data) {
         
         itemDiv.innerHTML = `
             <h2 class="item-name">${fields.Name || 'Unnamed'}</h2>
-            <p class="item-description">${fields.Description || 'No description'}</p>
-            <p class="item-category">Category: ${fields.Category || 'Uncategorized'}</p>
+            <p class="item-description">${fields.Title || 'No description'}</p>
+            <p class="item-category">Category: ${fields.Url || 'Uncategorized'}</p>
         `;
         
         contentDiv.appendChild(itemDiv);
