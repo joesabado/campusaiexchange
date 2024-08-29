@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-013');
+console.log('Script version: 2023-05-10-014');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -134,12 +134,22 @@ function setupSearch() {
 }
 
 function performSearch() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    console.log('Searching for:', searchTerm);
+    
     filteredData = allData.filter(item => {
         const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
         const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
-        return title.includes(searchTerm) || summary.includes(searchTerm);
+        
+        const matchTitle = title.includes(searchTerm);
+        const matchSummary = summary.includes(searchTerm);
+        
+        console.log(`Item: ${title}, Matches Title: ${matchTitle}, Matches Summary: ${matchSummary}`);
+        
+        return matchTitle || matchSummary;
     });
+    
+    console.log(`Search results: ${filteredData.length} items found`);
     currentPage = 1;
     displayData();
 }
