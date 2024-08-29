@@ -1,5 +1,5 @@
 let allData = [];
-const itemsPerPage = 10;
+const itemsPerPage = 10; // Make sure this is set to 10
 let currentPage = 1;
 const tableName = 'Contents';
 
