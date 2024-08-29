@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-10-007');
+console.log('Script version: 2023-05-10-008');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -30,6 +30,9 @@ async function fetchAirtableData() {
         return data.records;
     } catch (error) {
         console.error('Fetch error:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
         throw error;
     }
 }
@@ -48,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
             setupPagination();
         })
         .catch(error => {
-            console.error('Error:', error);
-            contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.message}</p>`;
+            console.error('Error in main execution:', error);
+            contentDiv.innerHTML = `<p class="error">Error loading data from ${tableName} table: ${error.name} - ${error.message}</p>`;
         });
 });
 
