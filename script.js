@@ -36,8 +36,8 @@ function displayData(data) {
         const fields = item.fields || {};
         
         itemDiv.innerHTML = `
-            <h2 class="item-name">${fields.Name || 'Unnamed'}</h2>
-            <p class="item-description">${fields.Title || 'No description'}</p>
+            <h2 class="item-name">${fields.Title || 'Unnamed'}</h2>
+            <p class="item-description">${fields.URL || 'No description'}</p>
             <p class="item-category">Category: ${fields.Url || 'Uncategorized'}</p>
         `;
         
