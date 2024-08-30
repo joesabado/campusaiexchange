@@ -81,7 +81,7 @@ function displayData() {
         
         html += `<li>
             <a href="${url}" target="_blank"><strong>${title}</strong></a><br>
-            ${summary}
+            ${summary}<br>
         </li>`;
     });
     html += '</ul>';
