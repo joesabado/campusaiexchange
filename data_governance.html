@@ -13,10 +13,6 @@
     <div id="header-placeholder"></div>
     <h1>Data Governance</h1>
     <div id="recordCount"></div>
-    <form id="searchForm">
-        <input type="text" id="searchInput" placeholder="Search Title or Short Summary">
-        <button type="submit" id="searchButton">Search</button>
-    </form>
     <div class="pagination" id="topPagination">
         <button id="prevPageTop">Previous</button>
         <span id="currentPageTop"></span>
@@ -24,11 +20,13 @@
     </div>
     <div id="content"></div>
     <script src="scripts/data_governance.js"></script>
+    <script src="scripts/global_search.js"></script>
     <script>
         fetch('header.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-placeholder').innerHTML = data;
+                setupGlobalSearch(); // Call this after the header is loaded
             });
     </script>
 </body>
