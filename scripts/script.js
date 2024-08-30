@@ -1,22 +1,21 @@
-console.log('Script version: 2023-05-12-007');
+console.log('Script version: 2023-05-12-008');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
 const tableName = 'Contents';
-const latestViewName = 'Latest';
 
 let allData = [];
 let filteredData = [];
 const itemsPerPage = 50;
 let currentPage = 1;
-let isSearching = false;
 
-async function fetchAirtableData(view = null, offset = null, maxRecords = null) {
+async function fetchAirtableData(offset = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
     const url = new URL(baseUrl);
-    if (view) url.searchParams.append('view', view);
-    if (offset) url.searchParams.append('offset', offset);
-    if (maxRecords) url.searchParams.append('maxRecords', maxRecords);
+    url.searchParams.append('pageSize', '100');
+    if (offset) {
+        url.searchParams.append('offset', offset);
+    }
     url.searchParams.append('sort[0][field]', 'Time Added');
     url.searchParams.append('sort[0][direction]', 'desc');
 
@@ -40,18 +39,11 @@ async function fetchAirtableData(view = null, offset = null, maxRecords = null) 
     }
 }
 
-async function fetchInitialData() {
-    console.log('Fetching initial data...');
-    const data = await fetchAirtableData(latestViewName, null, 50);
-    console.log('Initial data received:', data.records.length, 'items');
-    return data.records.slice(0, 50); // Ensure we only return 50 records
-}
-
 async function fetchAllData() {
     let allRecords = [];
     let offset = null;
     do {
-        const data = await fetchAirtableData(null, offset);
+        const data = await fetchAirtableData(offset);
         allRecords = allRecords.concat(data.records);
         offset = data.offset;
         console.log(`Fetched ${allRecords.length} records so far.`);
@@ -89,11 +81,7 @@ function displayData() {
 
 function updateRecordCount(count) {
     const recordCountDiv = document.getElementById('recordCount');
-    if (allData.length > count) {
-        recordCountDiv.innerHTML = `<p>Displaying ${count} of ${allData.length} total records. Use search to access all records.</p>`;
-    } else {
-        recordCountDiv.innerHTML = `<p>Total records: ${count}</p>`;
-    }
+    recordCountDiv.innerHTML = `<p>Total records: ${count}</p>`;
 }
 
 function setupPagination() {
@@ -133,44 +121,28 @@ function setupSearch() {
     });
 }
 
-async function performSearch() {
+function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     console.log('Searching for:', searchTerm);
     
-    if (!isSearching && searchTerm) {
-        isSearching = true;
-        document.getElementById('content').innerHTML = '<p>Searching...</p>';
+    filteredData = allData.filter(item => {
+        const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
+        const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
         
-        if (allData.length === 0) {
-            console.log('Fetching all data for search...');
-            allData = await fetchAllData();
-        }
-        
-        filteredData = allData.filter(item => {
-            const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
-            const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
-            
-            return title.includes(searchTerm) || summary.includes(searchTerm);
-        });
-        
-        console.log(`Search results: ${filteredData.length} items found`);
-        currentPage = 1;
-        displayData();
-        updateRecordCount(filteredData.length);
-        isSearching = false;
-    } else if (!searchTerm) {
-        filteredData = allData.slice(0, 50);
-        currentPage = 1;
-        displayData();
-        updateRecordCount(filteredData.length);
-    }
+        return title.includes(searchTerm) || summary.includes(searchTerm);
+    });
+    
+    console.log(`Search results: ${filteredData.length} items found`);
+    currentPage = 1;
+    displayData();
+    updateRecordCount(filteredData.length);
 }
 
 async function init() {
     try {
         console.log('Initializing...');
-        document.getElementById('content').innerHTML = '<p>Loading initial data...</p>';
-        allData = await fetchInitialData();
+        document.getElementById('content').innerHTML = '<p>Loading data...</p>';
+        allData = await fetchAllData();
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
