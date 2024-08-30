@@ -1,9 +1,4 @@
-console.log('Script version: 2023-05-12-009');
-
-// Add this function at the beginning of the file
-function addVersionToURL(url) {
-    return url + (url.includes('?') ? '&' : '?') + 'v=' + new Date().getTime();
-}
+console.log('Script version: 2023-05-13-001');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -16,7 +11,7 @@ let currentPage = 1;
 
 async function fetchAirtableData(offset = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
-    const url = new URL(addVersionToURL(baseUrl));
+    const url = new URL(baseUrl);
     url.searchParams.append('pageSize', '100');
     if (offset) {
         url.searchParams.append('offset', offset);
@@ -28,10 +23,8 @@ async function fetchAirtableData(offset = null) {
     try {
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
-                'Cache-Control': 'no-cache'
-            },
-            cache: 'no-store'
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
         });
 
         if (!response.ok) {
@@ -50,10 +43,15 @@ async function fetchAllData() {
     let allRecords = [];
     let offset = null;
     do {
-        const data = await fetchAirtableData(offset);
-        allRecords = allRecords.concat(data.records);
-        offset = data.offset;
-        console.log(`Fetched ${allRecords.length} records so far.`);
+        try {
+            const data = await fetchAirtableData(offset);
+            allRecords = allRecords.concat(data.records);
+            offset = data.offset;
+            console.log(`Fetched ${allRecords.length} records so far.`);
+        } catch (error) {
+            console.error('Error in fetchAllData:', error);
+            throw error;
+        }
     } while (offset);
     return allRecords;
 }
