@@ -59,3 +59,28 @@ body {
     text-decoration: underline;
 }
 
+/* Global search styles */
+#globalSearchForm {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#globalSearchInput {
+    width: 300px;
+    padding: 5px;
+    margin-right: 5px;
+}
+
+#globalSearchButton {
+    padding: 5px 10px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#globalSearchButton:hover {
+    background-color: #0056b3;
+}
+
