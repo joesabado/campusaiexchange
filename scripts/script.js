@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-12-002');
+console.log('Script version: 2023-05-12-003');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -8,33 +8,7 @@ let allData = [];
 let filteredData = [];
 const itemsPerPage = 50;
 let currentPage = 1;
-
-async function fetchAllAirtableData() {
-    let allRecords = [];
-    let offset = null;
-
-    do {
-        console.log('Fetching data...');
-        try {
-            const data = await fetchAirtableData(offset);
-            console.log('Received data:', data);
-            if (data && data.records) {
-                allRecords = allRecords.concat(data.records);
-                offset = data.offset;
-                console.log(`Fetched ${allRecords.length} records so far. Offset: ${offset}`);
-            } else {
-                console.error('Unexpected data structure:', data);
-                break;
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            break;
-        }
-    } while (offset);
-
-    console.log(`Total records fetched: ${allRecords.length}`);
-    return allRecords;
-}
+let isLoadingMore = false;
 
 async function fetchAirtableData(offset = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
@@ -64,6 +38,29 @@ async function fetchAirtableData(offset = null) {
     }
 }
 
+async function fetchInitialData() {
+    console.log('Fetching initial data...');
+    const data = await fetchAirtableData();
+    console.log('Initial data received:', data.records.length, 'items');
+    return data;
+}
+
+async function fetchRemainingData(offset) {
+    let allRecords = [];
+    let currentOffset = offset;
+
+    while (currentOffset) {
+        console.log('Fetching more data...');
+        const data = await fetchAirtableData(currentOffset);
+        allRecords = allRecords.concat(data.records);
+        currentOffset = data.offset;
+        console.log(`Fetched ${allRecords.length} additional records so far.`);
+    }
+
+    console.log(`Total additional records fetched: ${allRecords.length}`);
+    return allRecords;
+}
+
 function displayData() {
     console.log(`Displaying data for page ${currentPage}`);
     const contentDiv = document.getElementById('content');
@@ -80,7 +77,6 @@ function displayData() {
     
     let html = '<ul>';
     pageData.forEach((item, index) => {
-        console.log(`Processing item ${startIndex + index + 1}:`, item);
         html += `<li>
             <strong>${item.fields.Title || 'No Title'}</strong><br>
             ${item.fields['Short Summary'] || 'No summary available'}<br>
@@ -161,15 +157,24 @@ function performSearch() {
 async function init() {
     try {
         console.log('Initializing...');
-        document.getElementById('content').innerHTML = '<p>Loading data...</p>';
-        const records = await fetchAllAirtableData();
-        console.log(`Total data received from ${tableName} table:`, records.length, 'items');
-        allData = records;
+        document.getElementById('content').innerHTML = '<p>Loading initial data...</p>';
+        const initialData = await fetchInitialData();
+        allData = initialData.records;
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
         setupSearch();
         setupPagination();
+
+        // Fetch remaining data in the background
+        if (initialData.offset) {
+            document.getElementById('recordCount').innerHTML += ' (Loading more...)';
+            const remainingData = await fetchRemainingData(initialData.offset);
+            allData = allData.concat(remainingData);
+            filteredData = allData;
+            updateRecordCount(allData.length);
+            updatePaginationInfo();
+        }
     } catch (error) {
         console.error('Error in initialization:', error);
         document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
