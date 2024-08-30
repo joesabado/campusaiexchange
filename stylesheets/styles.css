@@ -18,3 +18,41 @@ body {
     margin: 0 10px;
 }
 
+/* Add more space between list items */
+#content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#content li {
+    margin-bottom: 20px; /* Increase this value for more space */
+    padding-bottom: 20px; /* Add padding to the bottom */
+    border-bottom: 1px solid #eee; /* Optional: adds a light separator line */
+}
+
+#content li:last-child {
+    border-bottom: none; /* Remove the border from the last item */
+}
+
+/* Make the title stand out more */
+#content li strong {
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* Style the summary text */
+#content li p {
+    margin-top: 5px;
+    color: #666;
+}
+
+/* Style the link */
+#content li a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+#content li a:hover {
+    text-decoration: underline;
+}
+
