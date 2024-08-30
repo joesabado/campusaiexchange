@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-12-006');
+console.log('Script version: 2023-05-12-007');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -44,7 +44,7 @@ async function fetchInitialData() {
     console.log('Fetching initial data...');
     const data = await fetchAirtableData(latestViewName, null, 50);
     console.log('Initial data received:', data.records.length, 'items');
-    return data.records;
+    return data.records.slice(0, 50); // Ensure we only return 50 records
 }
 
 async function fetchAllData() {
