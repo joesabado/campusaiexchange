@@ -1,4 +1,4 @@
-console.log('Global Search Script version: 2023-05-14-001');
+console.log('Global Search Script version: 2023-05-14-003');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -57,9 +57,21 @@ function displaySearchResults(results) {
 }
 
 function setupGlobalSearch() {
+    console.log('Setting up global search...');
     const searchForm = document.getElementById('globalSearchForm');
     const searchInput = document.getElementById('globalSearchInput');
 
+    if (!searchForm) {
+        console.error('Global search form not found');
+        return;
+    }
+
+    if (!searchInput) {
+        console.error('Global search input not found');
+        return;
+    }
+
+    console.log('Adding event listener to search form...');
     searchForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const searchTerm = searchInput.value.trim().toLowerCase();
@@ -73,6 +85,8 @@ function setupGlobalSearch() {
             }
         }
     });
+    console.log('Global search setup complete.');
 }
 
-document.addEventListener('DOMContentLoaded', setupGlobalSearch);
+// Export the setupGlobalSearch function
+window.setupGlobalSearch = setupGlobalSearch;

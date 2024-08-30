@@ -22,12 +22,15 @@
     <script src="scripts/data_governance.js"></script>
     <script src="scripts/global_search.js"></script>
     <script>
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
-                setupGlobalSearch(); // Call this after the header is loaded
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('header.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('header-placeholder').innerHTML = data;
+                    setupGlobalSearch(); // Call this after the header is loaded and inserted
+                })
+                .catch(error => console.error('Error loading header:', error));
+        });
     </script>
 </body>
 </html>
