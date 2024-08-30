@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-13-001');
+console.log('Script version: 2023-05-13-002');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -29,12 +29,15 @@ async function fetchAirtableData(offset = null) {
 
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('Response not OK:', response.status, response.statusText, errorText);
             throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('Data received:', data);
+        return data;
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error in fetchAirtableData:', error);
         throw error;
     }
 }
@@ -156,6 +159,8 @@ async function init() {
     } catch (error) {
         console.error('Error in initialization:', error);
         document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
+        // Add this line to show the full error in the console
+        console.error('Full error object:', error);
     }
 }
 
