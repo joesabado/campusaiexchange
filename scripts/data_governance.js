@@ -1,8 +1,4 @@
-console.log('Data Governance Script version: 2023-05-12-009');
-
-function addVersionToURL(url) {
-    return url + (url.includes('?') ? '&' : '?') + 'v=' + new Date().getTime();
-}
+console.log('Data Governance Script version: 2023-05-12-010');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -16,28 +12,23 @@ let currentPage = 1;
 
 async function fetchAirtableData(offset = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
-    const url = new URL(addVersionToURL(baseUrl));
+    const url = new URL(baseUrl);
     url.searchParams.append('view', viewName);
     url.searchParams.append('pageSize', '100');
     if (offset) {
         url.searchParams.append('offset', offset);
     }
-    url.searchParams.append('sort[0][field]', 'Time Added');
-    url.searchParams.append('sort[0][direction]', 'desc');
 
     console.log('Fetching data from URL:', url.toString());
     try {
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
-                'Cache-Control': 'no-cache'
-            },
-            cache: 'no-store'
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         return await response.json();
@@ -60,13 +51,10 @@ async function fetchAllData() {
 }
 
 function displayData() {
-    console.log(`Displaying data for page ${currentPage}`);
     const contentDiv = document.getElementById('content');
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pageData = filteredData.slice(startIndex, endIndex);
-    
-    console.log(`Displaying records ${startIndex + 1} to ${endIndex} of ${filteredData.length}`);
     
     if (pageData.length === 0) {
         contentDiv.innerHTML = '<p>No data to display</p>';
@@ -74,7 +62,7 @@ function displayData() {
     }
     
     let html = '<ul>';
-    pageData.forEach((item, index) => {
+    pageData.forEach(item => {
         html += `<li>
             <strong>${item.fields.Title || 'No Title'}</strong><br>
             ${item.fields['Short Summary'] || 'No summary available'}<br>
@@ -118,20 +106,15 @@ function updatePaginationInfo() {
 }
 
 function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-
-    searchButton.addEventListener('click', performSearch);
-    searchInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            performSearch();
-        }
+    const searchForm = document.getElementById('searchForm');
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        performSearch();
     });
 }
 
 function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    console.log('Searching for:', searchTerm);
     
     filteredData = allData.filter(item => {
         const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
@@ -140,7 +123,6 @@ function performSearch() {
         return title.includes(searchTerm) || summary.includes(searchTerm);
     });
     
-    console.log(`Search results: ${filteredData.length} items found`);
     currentPage = 1;
     displayData();
     updateRecordCount(filteredData.length);
@@ -148,7 +130,6 @@ function performSearch() {
 
 async function init() {
     try {
-        console.log('Initializing...');
         document.getElementById('content').innerHTML = '<p>Loading data...</p>';
         allData = await fetchAllData();
         filteredData = allData;
@@ -162,13 +143,4 @@ async function init() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded');
-    init();
-});
-
-function preventFormSubmission(event) {
-    event.preventDefault();
-}
-
-document.querySelector('form')?.addEventListener('submit', preventFormSubmission);
+document.addEventListener('DOMContentLoaded', init);
