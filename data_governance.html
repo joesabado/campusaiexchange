@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Data Governance - Airtable Data Display</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
 </head>
 <body>
     <h1>Data Governance</h1>
     <div id="recordCount"></div>
-    <div id="search">
+    <form id="searchForm">
         <input type="text" id="searchInput" placeholder="Search Title or Short Summary">
-        <button id="searchButton">Search</button>
-    </div>
+        <button type="submit" id="searchButton">Search</button>
+    </form>
     <div class="pagination" id="topPagination">
         <button id="prevPageTop">Previous</button>
         <span id="currentPageTop"></span>
         <button id="nextPageTop">Next</button>
     </div>
     <div id="content"></div>
-    <div class="pagination" id="bottomPagination">
-        <button id="prevPageBottom">Previous</button>
-        <span id="currentPageBottom"></span>
-        <button id="nextPageBottom">Next</button>
-    </div>
-    <script src="scripts/data_governance.js"></script>
+    <script src="scripts/data_governance.js?v=1"></script>
 </body>
 </html>

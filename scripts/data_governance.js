@@ -1,4 +1,8 @@
-console.log('Data Governance Script version: 2023-05-12-001');
+console.log('Data Governance Script version: 2023-05-12-009');
+
+function addVersionToURL(url) {
+    return url + (url.includes('?') ? '&' : '?') + 'v=' + new Date().getTime();
+}
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -10,48 +14,25 @@ let filteredData = [];
 const itemsPerPage = 50;
 let currentPage = 1;
 
-async function fetchAllAirtableData() {
-    let allRecords = [];
-    let offset = null;
-
-    do {
-        console.log('Fetching data...');
-        try {
-            const data = await fetchAirtableData(offset);
-            console.log('Received data:', data);
-            if (data && data.records) {
-                allRecords = allRecords.concat(data.records);
-                offset = data.offset;
-                console.log(`Fetched ${allRecords.length} records so far. Offset: ${offset}`);
-            } else {
-                console.error('Unexpected data structure:', data);
-                break;
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            break;
-        }
-    } while (offset);
-
-    console.log(`Total records fetched: ${allRecords.length}`);
-    return allRecords;
-}
-
 async function fetchAirtableData(offset = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
-    const url = new URL(baseUrl);
+    const url = new URL(addVersionToURL(baseUrl));
     url.searchParams.append('view', viewName);
     url.searchParams.append('pageSize', '100');
     if (offset) {
         url.searchParams.append('offset', offset);
     }
+    url.searchParams.append('sort[0][field]', 'Time Added');
+    url.searchParams.append('sort[0][direction]', 'desc');
 
     console.log('Fetching data from URL:', url.toString());
     try {
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-            }
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+                'Cache-Control': 'no-cache'
+            },
+            cache: 'no-store'
         });
 
         if (!response.ok) {
@@ -64,6 +45,18 @@ async function fetchAirtableData(offset = null) {
         console.error('Error fetching data:', error);
         throw error;
     }
+}
+
+async function fetchAllData() {
+    let allRecords = [];
+    let offset = null;
+    do {
+        const data = await fetchAirtableData(offset);
+        allRecords = allRecords.concat(data.records);
+        offset = data.offset;
+        console.log(`Fetched ${allRecords.length} records so far.`);
+    } while (offset);
+    return allRecords;
 }
 
 function displayData() {
@@ -82,7 +75,6 @@ function displayData() {
     
     let html = '<ul>';
     pageData.forEach((item, index) => {
-        console.log(`Processing item ${startIndex + index + 1}:`, item);
         html += `<li>
             <strong>${item.fields.Title || 'No Title'}</strong><br>
             ${item.fields['Short Summary'] || 'No summary available'}<br>
@@ -101,34 +93,28 @@ function updateRecordCount(count) {
 }
 
 function setupPagination() {
-    const prevButtons = document.querySelectorAll('#prevPageTop, #prevPageBottom');
-    const nextButtons = document.querySelectorAll('#nextPageTop, #nextPageBottom');
+    const prevButton = document.getElementById('prevPageTop');
+    const nextButton = document.getElementById('nextPageTop');
 
-    prevButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                displayData();
-            }
-        });
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayData();
+        }
     });
 
-    nextButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-                currentPage++;
-                displayData();
-            }
-        });
+    nextButton.addEventListener('click', () => {
+        if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+            currentPage++;
+            displayData();
+        }
     });
 }
 
 function updatePaginationInfo() {
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    const pageInfos = document.querySelectorAll('#currentPageTop, #currentPageBottom');
-    pageInfos.forEach(span => {
-        span.textContent = `Page ${currentPage} of ${totalPages}`;
-    });
+    const pageInfo = document.getElementById('currentPageTop');
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
 function setupSearch() {
@@ -163,9 +149,8 @@ function performSearch() {
 async function init() {
     try {
         console.log('Initializing...');
-        const records = await fetchAllAirtableData();
-        console.log(`Total data received from ${tableName} table, ${viewName} view:`, records.length, 'items');
-        allData = records;
+        document.getElementById('content').innerHTML = '<p>Loading data...</p>';
+        allData = await fetchAllData();
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
@@ -177,4 +162,13 @@ async function init() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM content loaded');
+    init();
+});
+
+function preventFormSubmission(event) {
+    event.preventDefault();
+}
+
+document.querySelector('form')?.addEventListener('submit', preventFormSubmission);
