@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-13-003');
+console.log('Script version: 2023-05-15-001');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -120,35 +120,6 @@ function updatePaginationInfo() {
     pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-
-    searchButton.addEventListener('click', performSearch);
-    searchInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            performSearch();
-        }
-    });
-}
-
-function performSearch() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    console.log('Searching for:', searchTerm);
-    
-    filteredData = allData.filter(item => {
-        const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
-        const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
-        
-        return title.includes(searchTerm) || summary.includes(searchTerm);
-    });
-    
-    console.log(`Search results: ${filteredData.length} items found`);
-    currentPage = 1;
-    displayData();
-    updateRecordCount(filteredData.length);
-}
-
 async function init() {
     try {
         console.log('Initializing...');
@@ -157,20 +128,14 @@ async function init() {
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
-        setupSearch();
         setupPagination();
     } catch (error) {
         console.error('Error in initialization:', error);
         document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
-        // Add this line to show the full error in the console
-        console.error('Full error object:', error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded');
-    init();
-});
+document.addEventListener('DOMContentLoaded', init);
 
 function preventFormSubmission(event) {
     event.preventDefault();
