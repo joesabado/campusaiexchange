@@ -1,22 +1,24 @@
-console.log('Script version: 2023-05-12-003');
+console.log('Script version: 2023-05-12-005');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
 const tableName = 'Contents';
+const latestViewName = 'Latest';
 
 let allData = [];
 let filteredData = [];
 const itemsPerPage = 50;
 let currentPage = 1;
-let isLoadingMore = false;
+let isSearching = false;
 
-async function fetchAirtableData(offset = null) {
+async function fetchAirtableData(view = null, offset = null, maxRecords = null) {
     const baseUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
     const url = new URL(baseUrl);
-    url.searchParams.append('pageSize', '100');
-    if (offset) {
-        url.searchParams.append('offset', offset);
-    }
+    if (view) url.searchParams.append('view', view);
+    if (offset) url.searchParams.append('offset', offset);
+    if (maxRecords) url.searchParams.append('maxRecords', maxRecords);
+    url.searchParams.append('sort[0][field]', 'Time Added');
+    url.searchParams.append('sort[0][direction]', 'desc');
 
     console.log('Fetching data from URL:', url.toString());
     try {
@@ -40,24 +42,20 @@ async function fetchAirtableData(offset = null) {
 
 async function fetchInitialData() {
     console.log('Fetching initial data...');
-    const data = await fetchAirtableData();
+    const data = await fetchAirtableData(latestViewName, null, 50);
     console.log('Initial data received:', data.records.length, 'items');
-    return data;
+    return data.records;
 }
 
-async function fetchRemainingData(offset) {
+async function fetchAllData() {
     let allRecords = [];
-    let currentOffset = offset;
-
-    while (currentOffset) {
-        console.log('Fetching more data...');
-        const data = await fetchAirtableData(currentOffset);
+    let offset = null;
+    do {
+        const data = await fetchAirtableData(null, offset);
         allRecords = allRecords.concat(data.records);
-        currentOffset = data.offset;
-        console.log(`Fetched ${allRecords.length} additional records so far.`);
-    }
-
-    console.log(`Total additional records fetched: ${allRecords.length}`);
+        offset = data.offset;
+        console.log(`Fetched ${allRecords.length} records so far.`);
+    } while (offset);
     return allRecords;
 }
 
@@ -95,34 +93,28 @@ function updateRecordCount(count) {
 }
 
 function setupPagination() {
-    const prevButtons = document.querySelectorAll('#prevPageTop, #prevPageBottom');
-    const nextButtons = document.querySelectorAll('#nextPageTop, #nextPageBottom');
+    const prevButton = document.getElementById('prevPageTop');
+    const nextButton = document.getElementById('nextPageTop');
 
-    prevButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                displayData();
-            }
-        });
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayData();
+        }
     });
 
-    nextButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
-                currentPage++;
-                displayData();
-            }
-        });
+    nextButton.addEventListener('click', () => {
+        if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+            currentPage++;
+            displayData();
+        }
     });
 }
 
 function updatePaginationInfo() {
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    const pageInfos = document.querySelectorAll('#currentPageTop, #currentPageBottom');
-    pageInfos.forEach(span => {
-        span.textContent = `Page ${currentPage} of ${totalPages}`;
-    });
+    const pageInfo = document.getElementById('currentPageTop');
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
 function setupSearch() {
@@ -137,44 +129,49 @@ function setupSearch() {
     });
 }
 
-function performSearch() {
+async function performSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
     console.log('Searching for:', searchTerm);
     
-    filteredData = allData.filter(item => {
-        const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
-        const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
+    if (!isSearching && searchTerm) {
+        isSearching = true;
+        document.getElementById('content').innerHTML = '<p>Searching...</p>';
         
-        return title.includes(searchTerm) || summary.includes(searchTerm);
-    });
-    
-    console.log(`Search results: ${filteredData.length} items found`);
-    currentPage = 1;
-    displayData();
-    updateRecordCount(filteredData.length);
+        if (allData.length === 0) {
+            console.log('Fetching all data for search...');
+            allData = await fetchAllData();
+        }
+        
+        filteredData = allData.filter(item => {
+            const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
+            const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
+            
+            return title.includes(searchTerm) || summary.includes(searchTerm);
+        });
+        
+        console.log(`Search results: ${filteredData.length} items found`);
+        currentPage = 1;
+        displayData();
+        updateRecordCount(filteredData.length);
+        isSearching = false;
+    } else if (!searchTerm) {
+        filteredData = allData.slice(0, 50);
+        currentPage = 1;
+        displayData();
+        updateRecordCount(filteredData.length);
+    }
 }
 
 async function init() {
     try {
         console.log('Initializing...');
         document.getElementById('content').innerHTML = '<p>Loading initial data...</p>';
-        const initialData = await fetchInitialData();
-        allData = initialData.records;
+        allData = await fetchInitialData();
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
         setupSearch();
         setupPagination();
-
-        // Fetch remaining data in the background
-        if (initialData.offset) {
-            document.getElementById('recordCount').innerHTML += ' (Loading more...)';
-            const remainingData = await fetchRemainingData(initialData.offset);
-            allData = allData.concat(remainingData);
-            filteredData = allData;
-            updateRecordCount(allData.length);
-            updatePaginationInfo();
-        }
     } catch (error) {
         console.error('Error in initialization:', error);
         document.getElementById('content').innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
