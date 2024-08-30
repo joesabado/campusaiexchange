@@ -1,4 +1,4 @@
-console.log('Data Governance Script version: 2023-05-13-003');
+console.log('Data Governance Script version: 2023-05-15-001');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -120,37 +120,14 @@ function updatePaginationInfo() {
     pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
-function setupSearch() {
-    const searchForm = document.getElementById('searchForm');
-    searchForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        performSearch();
-    });
-}
-
-function performSearch() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    
-    filteredData = allData.filter(item => {
-        const title = item.fields.Title ? item.fields.Title.toLowerCase() : '';
-        const summary = item.fields['Short Summary'] ? item.fields['Short Summary'].toLowerCase() : '';
-        
-        return title.includes(searchTerm) || summary.includes(searchTerm);
-    });
-    
-    currentPage = 1;
-    displayData();
-    updateRecordCount(filteredData.length);
-}
-
 async function init() {
     try {
+        console.log('Initializing...');
         document.getElementById('content').innerHTML = '<p>Loading data...</p>';
         allData = await fetchAllData();
         filteredData = allData;
         updateRecordCount(allData.length);
         displayData();
-        setupSearch();
         setupPagination();
     } catch (error) {
         console.error('Error in initialization:', error);
@@ -159,3 +136,6 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// Remove the event listener for form submission
+// document.querySelector('form')?.addEventListener('submit', preventFormSubmission);
