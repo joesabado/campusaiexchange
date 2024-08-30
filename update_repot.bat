@@ -3,17 +3,6 @@ setlocal enabledelayedexpansion
 
 echo Updating repository...
 
-REM Generate a new version number (using current date and time)
-for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
-set version=%datetime:~0,8%-%datetime:~8,6%
-
-REM Update version numbers in index.html
-powershell -Command "(gc index.html) -replace '(script.js\?v=)[0-9.-]+', '$1%version%' | Out-File -encoding ASCII index.html"
-powershell -Command "(gc index.html) -replace '(styles.css\?v=)[0-9.-]+', '$1%version%' | Out-File -encoding ASCII index.html"
-
-REM Update version number in script.js
-powershell -Command "(gc script.js) -replace '(Script version: )[0-9.-]+', '$1%version%' | Out-File -encoding ASCII script.js"
-
 REM Fetch the latest changes from the remote repository
 echo Fetching changes from remote repository
 git fetch origin
@@ -38,48 +27,41 @@ if %commit_count% gtr 0 (
     echo Local repository is up to date.
 )
 
-REM Remove data.json from tracking if it exists
-git rm --cached data.json 2>nul
-
-REM Add all changes
+REM Stage all changes
 echo Staging all changes
-git add .
+git add -A
 
 REM Check for large files
-for /f "tokens=3" %%a in ('git status --porcelain ^| findstr /r "^?? "') do (
-    for %%F in ("%%a") do (
-        set "size=%%~zF"
-        if !size! gtr 104857600 (
-            echo Warning: File %%F is larger than 100MB. Removing from staging.
-            git reset HEAD "%%F"
-        )
+git diff --cached --numstat | findstr /R "^-" > nul
+if not errorlevel 1 (
+    echo Warning: Large files detected. Please review before committing.
+    git diff --cached --numstat
+    set /p continue="Do you want to continue? (Y/N): "
+    if /i "!continue!" neq "Y" (
+        echo Aborting commit. Please review and stage files manually.
+        exit /b 1
     )
 )
 
-REM Check if there are changes to commit
-git diff --cached --quiet
+REM Commit changes
+set /p commit_message="Enter commit message: "
+if "!commit_message!"=="" (
+    set commit_message="Auto-update: %date% %time%"
+)
+echo Committing changes with message: "!commit_message!"
+git commit -m "!commit_message!"
+
+REM Push changes to remote repository
+echo Pushing changes to remote repository
+git push origin main
 if errorlevel 1 (
-    set /p commit_message="Enter commit message: "
-    if "!commit_message!"=="" (
-        set commit_message="Auto-update: %date% %time%"
-    )
-    echo Committing changes with message: "!commit_message!"
-    git commit -m "!commit_message!"
-    
-    REM Push changes to remote repository
-    echo Pushing changes to remote repository
+    echo Push failed. Pulling latest changes and trying again...
+    git pull --rebase origin main
     git push origin main
     if errorlevel 1 (
-        echo Push failed. Pulling latest changes and trying again...
-        git pull --rebase origin main
-        git push origin main
-        if errorlevel 1 (
-            echo Push failed again. Please resolve issues manually.
-            exit /b 1
-        )
+        echo Push failed again. Please resolve issues manually.
+        exit /b 1
     )
-) else (
-    echo No changes to commit
 )
 
 echo Repository update complete.
