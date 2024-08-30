@@ -18,7 +18,7 @@ body {
     margin: 0 10px;
 }
 
-/* Remove space between list items */
+/* Remove all space between list items */
 #content ul {
     list-style-type: none;
     padding: 0;
@@ -26,8 +26,8 @@ body {
 }
 
 #content li {
-    margin-bottom: 0;
-    padding: 1px 0; /* Add some vertical padding within each item */
+    margin: 0;
+    padding: 1px 0; /* Add minimal padding to prevent text from touching */
     border-bottom: 1px solid #eee;
 }
 
