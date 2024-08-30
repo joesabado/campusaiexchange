@@ -18,20 +18,20 @@ body {
     margin: 0 10px;
 }
 
-/* Add more space between list items */
+/* Adjust space between list items */
 #content ul {
     list-style-type: none;
     padding: 0;
 }
 
 #content li {
-    margin-bottom: 20px; /* Increase this value for more space */
-    padding-bottom: 20px; /* Add padding to the bottom */
-    border-bottom: 1px solid #eee; /* Optional: adds a light separator line */
+    margin-bottom: 15px; /* Decreased from 20px to 15px */
+    padding-bottom: 15px; /* Decreased from 20px to 15px */
+    border-bottom: 1px solid #eee;
 }
 
 #content li:last-child {
-    border-bottom: none; /* Remove the border from the last item */
+    border-bottom: none;
 }
 
 /* Make the title stand out more */
@@ -42,7 +42,8 @@ body {
 
 /* Style the summary text */
 #content li p {
-    margin-top: 5px;
+    margin-top: 3px; /* Decreased from 5px to 3px */
+    margin-bottom: 0; /* Ensure no extra space at the bottom of the paragraph */
     color: #666;
 }
 
