@@ -3,6 +3,17 @@ setlocal enabledelayedexpansion
 
 echo Updating repository...
 
+REM Generate a new version number (using current date and time)
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
+set version=%datetime:~0,8%-%datetime:~8,6%
+
+REM Update version numbers in index.html
+powershell -Command "(gc index.html) -replace '(script.js\?v=)[0-9.-]+', '$1%version%' | Out-File -encoding ASCII index.html"
+powershell -Command "(gc index.html) -replace '(styles.css\?v=)[0-9.-]+', '$1%version%' | Out-File -encoding ASCII index.html"
+
+REM Update version number in script.js
+powershell -Command "(gc script.js) -replace '(Script version: )[0-9.-]+', '$1%version%' | Out-File -encoding ASCII script.js"
+
 REM Fetch the latest changes from the remote repository
 echo Fetching changes from remote repository
 git fetch origin
