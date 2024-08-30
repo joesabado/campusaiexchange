@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-12-001');
+console.log('Script version: 2023-05-12-002');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -161,6 +161,7 @@ function performSearch() {
 async function init() {
     try {
         console.log('Initializing...');
+        document.getElementById('content').innerHTML = '<p>Loading data...</p>';
         const records = await fetchAllAirtableData();
         console.log(`Total data received from ${tableName} table:`, records.length, 'items');
         allData = records;
@@ -175,4 +176,13 @@ async function init() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM content loaded');
+    init();
+});
+
+function preventFormSubmission(event) {
+    event.preventDefault();
+}
+
+document.querySelector('form')?.addEventListener('submit', preventFormSubmission);
