@@ -27,7 +27,7 @@ body {
 
 #content li {
     margin-bottom: 0;
-    padding: 10px 0; /* Add some vertical padding within each item */
+    padding: 5px 0; /* Add some vertical padding within each item */
     border-bottom: 1px solid #eee;
 }
 
