@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-12-005');
+console.log('Script version: 2023-05-12-006');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -89,7 +89,11 @@ function displayData() {
 
 function updateRecordCount(count) {
     const recordCountDiv = document.getElementById('recordCount');
-    recordCountDiv.innerHTML = `<p>Total records: ${count}</p>`;
+    if (allData.length > count) {
+        recordCountDiv.innerHTML = `<p>Displaying ${count} of ${allData.length} total records. Use search to access all records.</p>`;
+    } else {
+        recordCountDiv.innerHTML = `<p>Total records: ${count}</p>`;
+    }
 }
 
 function setupPagination() {
