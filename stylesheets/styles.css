@@ -18,15 +18,16 @@ body {
     margin: 0 10px;
 }
 
-/* Adjust space between list items */
+/* Remove space between list items */
 #content ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 #content li {
-    margin-bottom: 15px; /* Decreased from 20px to 15px */
-    padding-bottom: 15px; /* Decreased from 20px to 15px */
+    margin-bottom: 0;
+    padding: 10px 0; /* Add some vertical padding within each item */
     border-bottom: 1px solid #eee;
 }
 
@@ -38,12 +39,13 @@ body {
 #content li strong {
     font-size: 1.1em;
     color: #333;
+    display: inline-block;
+    margin-bottom: 3px; /* Small space between title and summary */
 }
 
 /* Style the summary text */
 #content li p {
-    margin-top: 3px; /* Decreased from 5px to 3px */
-    margin-bottom: 0; /* Ensure no extra space at the bottom of the paragraph */
+    margin: 0;
     color: #666;
 }
 
