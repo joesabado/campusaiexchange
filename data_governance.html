@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
 </head>
 <body>
+    <div id="header-placeholder"></div>
     <h1>Data Governance</h1>
     <div id="recordCount"></div>
     <form id="searchForm">
@@ -23,5 +24,12 @@
     </div>
     <div id="content"></div>
     <script src="scripts/data_governance.js"></script>
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
+    </script>
 </body>
 </html>

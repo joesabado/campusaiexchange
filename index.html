@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
 </head>
 <body>
+    <div id="header-placeholder"></div>
     <h1>Homepage</h1>
     <div id="recordCount"></div>
     <form id="searchForm">
@@ -22,7 +23,14 @@
         <button id="nextPageTop">Next</button>
     </div>
     <div id="content"></div>
-    <script src="scripts/this_week.js"></script>
+    <script src="scripts/script.js"></script>
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
+    </script>
 </body>
 </html>
 
