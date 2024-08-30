@@ -1,4 +1,4 @@
-console.log('Global Search Script version: 2023-05-14-003');
+console.log('Global Search Script version: 2023-05-14-004');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';

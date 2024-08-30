@@ -27,7 +27,11 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('header-placeholder').innerHTML = data;
-                    setupGlobalSearch(); // Call this after the header is loaded and inserted
+                    if (typeof setupGlobalSearch === 'function') {
+                        setupGlobalSearch();
+                    } else {
+                        console.error('setupGlobalSearch function not found');
+                    }
                 })
                 .catch(error => console.error('Error loading header:', error));
         });
