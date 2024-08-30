@@ -20,18 +20,12 @@
     </div>
     <div id="content"></div>
     <script src="scripts/data_governance.js"></script>
-    <script src="scripts/global_search.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             fetch('header.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('header-placeholder').innerHTML = data;
-                    if (typeof setupGlobalSearch === 'function') {
-                        setupGlobalSearch();
-                    } else {
-                        console.error('setupGlobalSearch function not found');
-                    }
                 })
                 .catch(error => console.error('Error loading header:', error));
         });

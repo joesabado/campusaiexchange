@@ -20,14 +20,12 @@
     </div>
     <div id="content"></div>
     <script src="scripts/script.js"></script>
-    <script src="scripts/global_search.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             fetch('header.html')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('header-placeholder').innerHTML = data;
-                    setupGlobalSearch(); // Call this after the header is loaded and inserted
                 })
                 .catch(error => console.error('Error loading header:', error));
         });
