@@ -1,4 +1,4 @@
-console.log('Script version: 2023-05-13-002');
+console.log('Script version: 2023-05-13-003');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -75,10 +75,13 @@ function displayData() {
     
     let html = '<ul>';
     pageData.forEach((item, index) => {
+        const title = item.fields.Title || 'No Title';
+        const url = item.fields.URL || '#';
+        const summary = item.fields['Short Summary'] || 'No summary available';
+        
         html += `<li>
-            <strong>${item.fields.Title || 'No Title'}</strong><br>
-            ${item.fields['Short Summary'] || 'No summary available'}<br>
-            <a href="${item.fields.URL || '#'}" target="_blank">Link</a>
+            <a href="${url}" target="_blank"><strong>${title}</strong></a><br>
+            ${summary}
         </li>`;
     });
     html += '</ul>';

@@ -1,4 +1,4 @@
-console.log('Data Governance Script version: 2023-05-12-010');
+console.log('Data Governance Script version: 2023-05-13-003');
 
 const AIRTABLE_API_KEY = 'patbL8p7Pmy3Wpwlh.41d17501ee07102e1d63590b972f73de0736a3db992b5bd9a5f2482a9b666774';
 const AIRTABLE_BASE_ID = 'apphtyz3OAaOMcBM5';
@@ -28,12 +28,16 @@ async function fetchAirtableData(offset = null) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Response not OK:', response.status, response.statusText, errorText);
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('Data received:', data);
+        return data;
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error in fetchAirtableData:', error);
         throw error;
     }
 }
@@ -42,19 +46,27 @@ async function fetchAllData() {
     let allRecords = [];
     let offset = null;
     do {
-        const data = await fetchAirtableData(offset);
-        allRecords = allRecords.concat(data.records);
-        offset = data.offset;
-        console.log(`Fetched ${allRecords.length} records so far.`);
+        try {
+            const data = await fetchAirtableData(offset);
+            allRecords = allRecords.concat(data.records);
+            offset = data.offset;
+            console.log(`Fetched ${allRecords.length} records so far.`);
+        } catch (error) {
+            console.error('Error in fetchAllData:', error);
+            throw error;
+        }
     } while (offset);
     return allRecords;
 }
 
 function displayData() {
+    console.log(`Displaying data for page ${currentPage}`);
     const contentDiv = document.getElementById('content');
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pageData = filteredData.slice(startIndex, endIndex);
+    
+    console.log(`Displaying records ${startIndex + 1} to ${endIndex} of ${filteredData.length}`);
     
     if (pageData.length === 0) {
         contentDiv.innerHTML = '<p>No data to display</p>';
@@ -62,11 +74,14 @@ function displayData() {
     }
     
     let html = '<ul>';
-    pageData.forEach(item => {
+    pageData.forEach((item, index) => {
+        const title = item.fields.Title || 'No Title';
+        const url = item.fields.URL || '#';
+        const summary = item.fields['Short Summary'] || 'No summary available';
+        
         html += `<li>
-            <strong>${item.fields.Title || 'No Title'}</strong><br>
-            ${item.fields['Short Summary'] || 'No summary available'}<br>
-            <a href="${item.fields.URL || '#'}" target="_blank">Link</a>
+            <a href="${url}" target="_blank"><strong>${title}</strong></a><br>
+            ${summary}
         </li>`;
     });
     html += '</ul>';
